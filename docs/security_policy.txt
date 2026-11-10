@@ -1,0 +1,1 @@
+ACME Security Manual 2026: Two-factor authentication is mandatory for all infrastructure access via YubiKey hardware tokens.

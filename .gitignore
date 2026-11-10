@@ -1,0 +1,49 @@
+# Python & Virtual Environment
+.venv/
+venv/
+ENV/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Sensitive Credentials & Environment Config
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# Vector Database Storage (Local ChromaDB state)
+chroma_db/
+.chroma_db/
+*.sqlite3
+
+# Node Dependencies & Package Manager Logs
+frontend/node_modules/
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-debug.log*
+.vite/
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor & Workspace Folders
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# User Uploaded PDFs (keep sample demo docs in docs/)
+docs/*.pdf
+
+# Local logs
+*.log

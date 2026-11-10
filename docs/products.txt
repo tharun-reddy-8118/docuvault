@@ -1,0 +1,7 @@
+ACME Product Catalog - 2026
+
+1. Acme Titan Server:
+The flagship enterprise AI server equipped with 128-core neural accelerators, liquid immersion cooling, and 2TB ECC DDR5 memory. Base pricing starts at $45,000 with a 5-year on-site SLA warranty.
+
+2. Acme Nano Sensor:
+An ultra-low-power IoT environmental sensor operating on ambient solar energy, capable of monitoring air quality, temperature, and seismic micro-vibrations for up to 10 years without battery replacement.
