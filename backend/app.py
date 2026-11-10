@@ -14,6 +14,13 @@ from langgraph.prebuilt import create_react_agent
 from langgraph.checkpoint.memory import MemorySaver
 from langchain_core.tools import tool
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DOCS_DIR = os.path.join(BASE_DIR, "docs")
+os.makedirs(DOCS_DIR, exist_ok=True)
+
+# Detect frontend/dist path whether run from root or backend directory
+FRONTEND_DIST = os.path.join(BASE_DIR, "..", "frontend", "dist") if os.path.exists(os.path.join(BASE_DIR, "..", "frontend", "dist")) else os.path.join(BASE_DIR, "frontend", "dist")
+
 # 1. Initialize FastAPI Application
 app = FastAPI(title="Private Knowledge Engine API", version="1.0.0")
 
@@ -97,11 +104,10 @@ class IngestResponse(BaseModel):
 @app.get("/api/status")
 def get_system_status():
     """Returns real operational metrics and indexed files."""
-    docs_dir = "./docs"
     available_files = []
-    if os.path.exists(docs_dir):
-        for f in os.listdir(docs_dir):
-            full_path = os.path.join(docs_dir, f)
+    if os.path.exists(DOCS_DIR):
+        for f in os.listdir(DOCS_DIR):
+            full_path = os.path.join(DOCS_DIR, f)
             if os.path.isfile(full_path):
                 available_files.append({
                     "name": f,
@@ -177,10 +183,10 @@ async def chat_endpoint(req: ChatRequest):
 
 @app.post("/api/upload")
 async def upload_document(file: UploadFile = File(...)):
-    """Uploads a document to ./docs and automatically indexes it into ChromaDB."""
-    os.makedirs("./docs", exist_ok=True)
+    """Uploads a document to backend/docs and automatically indexes it into ChromaDB."""
+    os.makedirs(DOCS_DIR, exist_ok=True)
     filename = os.path.basename(file.filename)
-    dest_path = os.path.join("./docs", filename)
+    dest_path = os.path.join(DOCS_DIR, filename)
 
     try:
         with open(dest_path, "wb") as buffer:
@@ -202,11 +208,12 @@ async def upload_document(file: UploadFile = File(...)):
 @app.post("/api/ingest", response_model=IngestResponse)
 def ingest_endpoint(req: IngestRequest):
     """Dynamically ingests a local file by path."""
-    if not os.path.exists(req.file_path):
+    target_path = req.file_path if os.path.isabs(req.file_path) else os.path.join(BASE_DIR, req.file_path)
+    if not os.path.exists(target_path):
         raise HTTPException(status_code=404, detail=f"File '{req.file_path}' not found.")
 
     try:
-        msg = rag_engine.index_document(req.file_path)
+        msg = rag_engine.index_document(target_path)
         count = rag_engine.vector_db._collection.count()
         return IngestResponse(
             success=True,
@@ -217,16 +224,18 @@ def ingest_endpoint(req: IngestRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 # Mount static assets and fallback for React SPA client-side routing
-if os.path.exists("./frontend/dist"):
-    app.mount("/assets", StaticFiles(directory="./frontend/dist/assets"), name="assets")
+if os.path.exists(FRONTEND_DIST):
+    assets_dir = os.path.join(FRONTEND_DIST, "assets")
+    if os.path.exists(assets_dir):
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
 
     @app.get("/{full_path:path}")
     async def serve_spa(full_path: str):
         if full_path:
-            candidate = os.path.join("./frontend/dist", full_path)
+            candidate = os.path.join(FRONTEND_DIST, full_path)
             if os.path.exists(candidate) and os.path.isfile(candidate):
                 return FileResponse(candidate)
-        return FileResponse("./frontend/dist/index.html")
+        return FileResponse(os.path.join(FRONTEND_DIST, "index.html"))
 
 if __name__ == "__main__":
     import uvicorn

@@ -33,9 +33,11 @@ def mcp_to_langchain_tool(session: ClientSession, mcp_tool):
 async def main():
     llm = ChatOllama(model="qwen3:4b-instruct", temperature=0)
 
+    import sys, os
+    server_script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "server.py")
     server_params = StdioServerParameters(
-        command="python",
-        args=["server.py"],
+        command=sys.executable,
+        args=[server_script],
     )
 
     print("Connecting to MCP Server...")

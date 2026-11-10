@@ -67,22 +67,27 @@ flowchart TD
 
 ```text
 mcp-rag-engine/
-├── .env.example             # Example environment configuration
-├── .gitignore                # Git ignore rules for Python, Node, and vector data
-├── README.md                 # Complete system documentation
-├── requirements.txt          # Python backend dependencies
-├── app.py                    # FastAPI server, LangGraph agent, and SPA server
-├── rag_engine.py             # ChromaDB vector store and document processing
-├── server.py                 # Standalone FastMCP server definition
-├── agent.py                  # Standalone CLI autonomous ReAct agent
-├── docs/                     # Local document vault for indexed files
-│   ├── policy.txt            # ACME Corp Employee Handbook
-│   ├── products.txt          # ACME Titan Server specifications and pricing
-│   └── security_policy.txt   # Security policies and authentication requirements
+├── .env.example             # Example environment configuration template
+├── .gitignore                # Root git ignore rules for Python, Node, and vector data
+├── LICENSE                   # MIT open-source license
+├── README.md                 # Product documentation and setup guide
+│
+├── backend/                  # Python FastAPI, RAG, and MCP Server
+│   ├── .env.example          # Backend environment template
+│   ├── app.py                # FastAPI REST server & LangGraph agent
+│   ├── rag_engine.py         # ChromaDB vector store & embeddings integration
+│   ├── server.py             # Standalone FastMCP server (stdio transport)
+│   ├── agent.py              # Standalone CLI autonomous ReAct agent
+│   ├── requirements.txt      # Python dependencies
+│   └── docs/                 # Document vault for knowledge base files
+│       ├── policy.txt        # ACME Corp Employee Handbook
+│       ├── products.txt      # ACME Titan Server specifications & pricing
+│       └── security_policy.txt # Security guidelines and access policies
+│
 └── frontend/                 # React 18 + Material-UI SaaS application
     ├── index.html            # Application entry HTML with custom SVG favicon
     ├── package.json          # Frontend dependencies and build scripts
-    ├── vite.config.js        # Vite configuration
+    ├── vite.config.js        # Vite configuration with /api reverse proxy
     ├── public/
     │   └── favicon.svg       # Custom geometric emerald vault favicon
     ├── dist/                 # Pre-compiled static assets served by FastAPI
@@ -104,7 +109,7 @@ mcp-rag-engine/
 ## Prerequisites
 
 1. **Python 3.10+**
-2. **Node.js 18+** (Optional, only required if rebuilding the frontend)
+2. **Node.js 18+** (Optional, only required if modifying the frontend)
 3. **Ollama**: Installed and running locally ([Download Ollama](https://ollama.com/))
 4. **Google Gemini API Key**: For 3072-dimensional vector embeddings ([Get API Key](https://aistudio.google.com/app/apikey))
 
@@ -119,9 +124,11 @@ git clone https://github.com/your-username/mcp-rag-engine.git
 cd mcp-rag-engine
 ```
 
-### 2. Set Up Python Environment
+### 2. Set Up the Backend
 
 ```bash
+cd backend
+
 # Create virtual environment
 python -m venv .venv
 
@@ -136,8 +143,6 @@ pip install -r requirements.txt
 ```
 
 ### 3. Configure Environment Variables
-
-Copy `.env.example` to `.env` and insert your Gemini API key:
 
 ```bash
 cp .env.example .env
@@ -157,23 +162,29 @@ Ensure Ollama is running, then pull the target model:
 ollama pull qwen3:4b-instruct
 ```
 
-### 5. (Optional) Rebuild Frontend
+### 5. Start the Application
 
-> Pre-compiled frontend assets are already included in `frontend/dist`. If you make changes to frontend code, rebuild with:
+From within the `backend/` directory:
+
+```bash
+python -m uvicorn app:app --host 127.0.0.1 --port 8000 --reload
+```
+
+*(Or from the repository root: `python -m uvicorn backend.app:app --host 127.0.0.1 --port 8000 --reload`)*
+
+Open your browser and navigate to:
+**`http://127.0.0.1:8000/`**
+
+---
+
+### 6. (Optional) Frontend Development
+
+Pre-compiled production assets are already included in `frontend/dist`. If you want to modify or rebuild the frontend:
 
 ```bash
 cd frontend
 npm install
 npm run build
-cd ..
-```
-
-### 6. Start the Application
-
-Start the FastAPI application with Uvicorn:
-
-```bash
-python -m uvicorn app:app --host 127.0.0.1 --port 8000 --reload
 ```
 
 Open your browser and navigate to:
@@ -220,3 +231,4 @@ The application exposes two Model Context Protocol tools:
 ## License
 
 This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+

@@ -6,9 +6,11 @@ from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_ollama import ChatOllama
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-load_dotenv()
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+dotenv_path = os.path.join(BASE_DIR, ".env") if os.path.exists(os.path.join(BASE_DIR, ".env")) else os.path.join(BASE_DIR, "..", ".env")
+load_dotenv(dotenv_path)
 
-CHROMA_PATH = "./chroma_db"
+CHROMA_PATH = os.path.join(BASE_DIR, "chroma_db")
 
 embeddings = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001")
 llm = ChatOllama(model="qwen3:4b-instruct", temperature=0)
